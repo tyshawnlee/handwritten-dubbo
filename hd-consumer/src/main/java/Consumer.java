@@ -10,6 +10,7 @@ import java.util.concurrent.CountDownLatch;
 import com.client.constant.DubboConst;
 import com.client.dto.BookDTO;
 import com.client.service.IBookService;
+import com.client.utils.ProxyFactory;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
@@ -25,8 +26,8 @@ import org.slf4j.LoggerFactory;
  */
 public class Consumer {
 	private static Logger logger = LoggerFactory.getLogger(Consumer.class);
-	private List<String> providerList;
 	private ZooKeeper zk;
+	private List<String> providerList;
 
 	/**
 	 * 连接zk
@@ -58,9 +59,8 @@ public class Consumer {
 	/**
 	 * Consumer在ZooKeeper订阅服务
 	 * @param serviceName
-	 * @param host
 	 */
-	public void subscribe(String serviceName, String host) {
+	public void subscribe(String serviceName) {
 		try {
 			//获取服务provider地址, 同时注册一个监听器, 当provider数目发生变化时要及时更新provider的地址
 			String subscribeNodePath = DubboConst.rootNode + "/" + serviceName + "/" + DubboConst.providerNode;
@@ -77,24 +77,18 @@ public class Consumer {
 					}
 				}
 			});
-
-			//创建consumer节点
-			String nodePath = DubboConst.rootNode + "/" + serviceName + "/" + DubboConst.consumerNode + "/" + host;
-			if (zk.exists(nodePath, false) == null) {
-				zk.create(nodePath, "".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
-			}
+			logger.info(serviceName + "的服务提供者列表: " + providerList);
 		} catch (Exception e) {
-			logger.error("Consumer在ZooKeeper订阅服务报错, service=" + serviceName + ",host=" + host, e);
+			logger.error("Consumer在ZooKeeper订阅服务报错, service=" + serviceName, e);
 		}
 	}
 
-	public static void main(String[] args) {
-		IBookService bookService = (IBookService) getRpcProxy(IBookService.class);
-		BookDTO bookInfo = bookService.getBookInfo(1);
-		System.out.println(bookInfo);
-	}
-
-	private static Object getRpcProxy(final Class clazz) {
+	/**
+	 * 获取RPC代理
+	 * @param clazz
+	 * @return
+	 */
+	public static Object getRpcProxy(final Class clazz) {
 		return Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{clazz}, new InvocationHandler() {
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 				Socket socket = new Socket("127.0.0.1", 12000);
@@ -120,6 +114,15 @@ public class Consumer {
 				return object;
 			}
 		});
+	}
+
+	public static void main(String[] args) {
+		Consumer consumer = new Consumer("114.55.27.138:2181");
+		consumer.subscribe(IBookService.class.getName());
+
+		IBookService bookService = (IBookService) getRpcProxy(IBookService.class);
+		BookDTO bookInfo = bookService.getBookInfo(1);
+		System.out.println(bookInfo);
 	}
 
 }

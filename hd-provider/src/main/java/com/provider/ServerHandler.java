@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.Map;
 
+import com.client.protocol.Invocation;
 import com.client.service.IBookService;
 import com.provider.service.BookServiceImpl;
 
@@ -32,16 +33,17 @@ public class ServerHandler implements Runnable {
 			in = new ObjectInputStream(socket.getInputStream());
 			out = new ObjectOutputStream(socket.getOutputStream());
 
-			//获取接口名, 方法名, 方法参数class, 方法参数
-			String className = in.readUTF();
-			String methodName = in.readUTF();
-			Class[] paramTypes = (Class[]) in.readObject();
-			Object[] params = (Object[]) in.readObject();
+			//获取Invocation对象
+			Invocation invocation = (Invocation) in.readObject();
+//			String className = in.readUTF();
+//			String methodName = in.readUTF();
+//			Class[] paramTypes = (Class[]) in.readObject();
+//			Object[] params = (Object[]) in.readObject();
 
 			//执行对应方法
-			Class clazz = serviceMap.get(className);
-			Method method = clazz.getMethod(methodName, paramTypes);
-			Object invoke = method.invoke(clazz.newInstance(), params);
+			Class clazz = serviceMap.get(invocation.getInterfaceName());
+			Method method = clazz.getMethod(invocation.getMethodName(), invocation.getParamTypes());
+			Object invoke = method.invoke(clazz.newInstance(), invocation.getParams());
 
 			//返回方法执行结果
 			out.writeObject(invoke);

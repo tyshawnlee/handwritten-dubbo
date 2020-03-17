@@ -50,8 +50,8 @@ public class RegisterCenter {
 
 	/**
 	 * 将服务和服务提供者URL注册到注册中心
-	 * @param serviceName
-	 * @param serviceProviderAddr
+	 * @param serviceName 服务名称
+	 * @param serviceProviderAddr 服务所在TCP地址
 	 */
 	public void register(String serviceName, String serviceProviderAddr) {
 		try {
@@ -61,21 +61,14 @@ public class RegisterCenter {
 				zk.create(servicePath, "".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 			}
 
-			//创建服务地址节点
-			String serviceAddrPath = servicePath + "/" + serviceProviderAddr;
-			if (zk.exists(serviceAddrPath, false) == null) {
-				zk.create(serviceAddrPath, "".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+			//创建服务提供者节点
+			String serviceProviderPath = servicePath + "/" + serviceProviderAddr;
+			if (zk.exists(serviceProviderPath, false) == null) {
+				zk.create(serviceProviderPath, "".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
 			}
-
-			logger.info("服务注册成功, 服务路径: " + serviceAddrPath);
+			logger.info("服务注册成功, 服务路径: " + serviceProviderPath);
 		} catch (Exception e) {
 			logger.error("注册中心-注册服务报错", e);
 		}
-	}
-
-	public static void main(String[] args) throws IOException {
-		RegisterCenter registerCenter = new RegisterCenter();
-		registerCenter.register("com.client.dto.BookDTO.IBookService", "192.168.2.97:12000");
-		System.in.read();
 	}
 }

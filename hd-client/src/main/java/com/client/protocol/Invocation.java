@@ -2,6 +2,9 @@ package com.client.protocol;
 
 import java.io.Serializable;
 
+/**
+ * 封装接口名, 方法名, 参数字节码数组, 参数对象
+ */
 public class Invocation implements Serializable {
     private static final long serialVersionUID = -2798340582119604989L;
 

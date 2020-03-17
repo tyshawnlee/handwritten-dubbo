@@ -48,13 +48,16 @@ public class ServiceSubscribe {
 	}
 
 	/**
-	 * 在注册中心订阅服务, 返回对应的服务地址
+	 * 在注册中心订阅服务, 返回对应的服务url
+	 * 只要第一次获取到了服务的RPC地址, 后面注册中心挂掉之后, 仍然可以继续通信.
 	 * @param serviceName 服务名称
 	 * @return 服务host
 	 */
 	public String subscribe(String serviceName) {
+		//服务节点路径
 		String servicePath = ZooKeeperConst.rootNode + "/" + serviceName;
 		try {
+			//获取服务节点下的所有子节点, 即服务的RPC地址
 			providerList = zk.getChildren(servicePath, new Watcher() {
 				@Override
 				public void process(WatchedEvent event) {
@@ -71,8 +74,9 @@ public class ServiceSubscribe {
 		} catch (Exception e) {
 			logger.error("从注册中心获取服务报错.", e);
 		}
-
 		logger.info(serviceName + "的服务提供者列表: " + providerList);
+
+		//负载均衡
 		RandomLoadBalance randomLoadBalance = new RandomLoadBalance();
 		return randomLoadBalance.doSelect(providerList);
 	}

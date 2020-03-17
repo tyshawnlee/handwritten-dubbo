@@ -40,11 +40,6 @@ public class RpcServiceProxy {
 				String methodName = method.getName();
 				Class[] paramTypes = method.getParameterTypes();
 				Invocation invocation = new Invocation(className, methodName, paramTypes, args);
-//				out.writeUTF(className);
-//				out.writeUTF(methodName);
-//				out.writeObject(paramTypes);
-//				out.writeObject(args);
-//				out.flush();
 				out.writeObject(invocation);
 				out.flush();
 

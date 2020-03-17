@@ -35,10 +35,6 @@ public class ServerHandler implements Runnable {
 
 			//获取Invocation对象
 			Invocation invocation = (Invocation) in.readObject();
-//			String className = in.readUTF();
-//			String methodName = in.readUTF();
-//			Class[] paramTypes = (Class[]) in.readObject();
-//			Object[] params = (Object[]) in.readObject();
 
 			//执行对应方法
 			Class clazz = serviceMap.get(invocation.getInterfaceName());

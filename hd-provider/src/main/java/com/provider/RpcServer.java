@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * RPC监听服务, 监听Consumer的远程调用
+ * RPC监听服务, 监听consumer远程调用的tcp连接
  * @author litianxiang
  * @date 2020/3/17 18:01
  */

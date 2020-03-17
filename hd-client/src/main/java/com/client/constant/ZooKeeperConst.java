@@ -8,7 +8,7 @@ public class ZooKeeperConst {
 	/**
 	 * ZooKeeper的地址
 	 */
-	public static String host = "114.55.27.138:2181";
+	public static String host = "xxx.xx.xx.xxx:2181";
 	/**
 	 * Dubbo在ZooKeeper上的根节点
 	 */

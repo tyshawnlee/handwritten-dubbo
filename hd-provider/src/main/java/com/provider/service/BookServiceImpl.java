@@ -8,6 +8,7 @@ import com.client.service.IBookService;
  * @date 2020/3/6 15:25
  */
 public class BookServiceImpl implements IBookService {
+	@Override
 	public BookDTO getBookInfo(int id) {
 		if (id == 1) {
 			BookDTO bookDTO = new BookDTO();

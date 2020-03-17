@@ -5,21 +5,26 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Method;
 import java.net.Socket;
+import java.util.Map;
 
 import com.client.service.IBookService;
 import com.provider.service.BookServiceImpl;
 
 /**
+ * 处理RPC, 通过反射执行方法
  * @author litianxiang
  * @date 2020/3/6 17:52
  */
 public class ServerHandler implements Runnable {
 	private Socket socket;
+	private Map<String, Class> serviceMap;
 
-	public ServerHandler(Socket socket) {
+	public ServerHandler(Socket socket, Map<String, Class> serviceMap) {
 		this.socket = socket;
+		this.serviceMap = serviceMap;
 	}
 
+	@Override
 	public void run() {
 		ObjectInputStream in = null;
 		ObjectOutputStream out = null;
@@ -33,15 +38,8 @@ public class ServerHandler implements Runnable {
 			Class[] paramTypes = (Class[]) in.readObject();
 			Object[] params = (Object[]) in.readObject();
 
-			Class clazz = null;
-			//模拟<dubbo:service interface="com.client.service.IBookService" ref="bookService"/>, 获取接口对应的实现类
-			if (className.equals(IBookService.class.getName())) {
-				clazz = BookServiceImpl.class;
-			} else {
-				return;
-			}
-
 			//执行对应方法
+			Class clazz = serviceMap.get(className);
 			Method method = clazz.getMethod(methodName, paramTypes);
 			Object invoke = method.invoke(clazz.newInstance(), params);
 
